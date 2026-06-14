@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manufacturer Dashboard</h2>
+    <a href="{% url 'add_product' %}" class="btn btn-success">Add Product</a>
+    <a href="{% url 'register_distributor' %}" class="btn btn-info mb-3">Add Distributor</a>
+
+    <!-- Product Cards -->
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p class="h5">Base Price: ₹{{ product.base_price }}</p>
+                    <p class="text-muted">Available Quantity: {{ product.available_quantity }}</p>
+                    <div class="btn-group">
+                        <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'delete_product' product.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Sales Table -->
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Sales to Distributors</h2>
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="text-sm uppercase">
+                        <th>Transaction ID</th>
+                        <th>Product</th>
+                        <th>Manufacturer Price</th>
+                        <th>Quantity</th>
+                        <th>Distributor Name</th>
+                        <th>Block Hash</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in sales_transactions %}
+                    <tr>
+                        <td>{{ tx.transaction_id }}</td>
+                        <td>{{ tx.manu_product.name }}</td>
+                        <td>₹{{ tx.manu_product.base_price|floatformat:2 }}</td>
+                        <td>{{ tx.quantity }}</td>
+                        <td>{{ tx.customer.get_full_name }}</td>
+                        <td class="font-mono">
+                            {% if tx.blocks %}
+                                {{ tx.blocks.0.hash}}...
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </td>
+                        <td>{{ tx.timestamp|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No sales transactions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% comment %} {% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manufacturer Dashboard</h2>
+    <a href="{% url 'add_product' %}" class="btn btn-success">Add Product</a>
+    <a href="{% url 'register_distributor' %}" class="btn btn-info mb-3">Add Distributor</a>
+
+
+    
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p class="h5">Base Price: ₹{{ product.base_price }}</p>
+                    <p class="text-muted">Available Quantity: {{ product.available_quantity }}</p>
+                    <div class="btn-group">
+                        <a href="{% url 'edit_product' product.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'delete_product' product.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} {% endcomment %}

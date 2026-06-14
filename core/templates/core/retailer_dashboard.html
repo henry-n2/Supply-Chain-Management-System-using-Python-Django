@@ -1,0 +1,139 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Retailer Dashboard</h2>
+
+    <!-- Add Products from Distributors Section -->
+    <h4 class="mt-4">Add Products from Distributors</h4>
+    <div class="row">
+        {% for stock in distributor_products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ stock.product.image.url }}" class="card-img-top" alt="{{ stock.product.name }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ stock.product.name }}</h5>
+                    <p class="card-text">{{ stock.product.description }}</p>
+                    <p class="text-muted">Distributor Price: ₹{{ stock.price }}</p>
+                    <p class="text-muted">Available: {{ stock.available_quantity }}</p>
+                    <form method="post" action="{% url 'add_to_retailer_stock' stock.id %}">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="number" name="quantity" class="form-control" placeholder="Quantity" min="1" max="{{ stock.available_quantity }}" required>
+                            <input type="number" name="price" class="form-control" placeholder="Customer Price" step="0.01" min="0.01" required>
+                            <button class="btn btn-primary" type="submit">Add to My Stock</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No distributor products available.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Your Added Products Section -->
+    <h4 class="mt-5">Your Added Products for Customers</h4>
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Customer Price</th>
+                <th>Available Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in my_stocks %}
+            <tr>
+                <td>{{ stock.product.product.name }}</td>
+                <td>₹{{ stock.price }}</td>
+                <td>{{ stock.available_quantity }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted">No products added yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Customer Sales Transactions -->
+    <h3 class="mt-5">Your Customer Sales</h3>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Customer</th>
+                    <th>Block Hash</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in customer_transactions %}
+                <tr>
+                    <td>{{ tx.transaction_id }}</td>
+                    <td>{{ tx.product.product.product.name }}</td>
+                    <td>₹{{ tx.amount|floatformat:2 }}</td>
+                    <td>{{ tx.quantity }}</td>
+                    <td>{{ tx.customer.get_full_name }}</td>
+                    <td class="text-monospace">
+                        {% if tx.blocks %}
+                            {% comment %} <small>{{ tx.blocks.0.hash|truncatechars:20 }}</small> {% endcomment %}
+                            {{ tx.blocks.0.hash }}
+                        {% else %}
+                            <span class="text-muted">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ tx.timestamp|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No customer transactions found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Distributor Purchase Transactions -->
+    <h3>Purchases</h3>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Distributor</th>
+                <th>Block Hash</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in distributor_transactions %}
+            <tr>
+                <td>{{ tx.product.product.product.name }}</td>
+                <td>{{ tx.quantity }}</td>
+                <td>₹{{ tx.amount|floatformat:2 }}</td>
+                <td>{{ tx.retailer.get_full_name }}</td>
+                <td>
+                    {% if tx.blocks %}
+                    {{ tx.blocks.0.hash }}
+                    {% else %}
+                        Pending
+                    {% endif %}
+                </td>
+                <td>{{ tx.timestamp|date:"M d, Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No distributor purchases found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+{% endblock %}

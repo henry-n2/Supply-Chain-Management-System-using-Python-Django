@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <img src="{{ product_image }}" class="card-img-top" alt="{{ product_name }}" style="max-height: 250px; object-fit: cover;">
+        <div class="card-body">
+          <h4 class="card-title">{{ product_name }}</h4>
+          <p>{{ product_description }}</p>
+          <p class="h5">Price: ₹{{ price }}</p>
+          <p class="text-muted">Available: {{ available_quantity }}</p>
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="transaction_id" class="form-label">Transaction ID</label>
+              <input type="text" class="form-control" id="transaction_id" name="transaction_id" required>
+            </div>
+            <div class="mb-3">
+              <label for="quantity" class="form-label">Quantity</label>
+              <input type="number" class="form-control" id="quantity" name="quantity" min="1" max="{{ available_quantity }}" value="1" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Total</label>
+              <input type="text" class="form-control" id="total" value="{{ price }}" readonly>
+            </div>
+            <button type="submit" class="btn btn-success">Purchase</button>
+            <a href="{% url 'distributor_dashboard' %}" class="btn btn-secondary">Cancel</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('quantity').addEventListener('input', function() {
+  var price = {{ price }};
+  var quantity = this.value;
+  document.getElementById('total').value = price * quantity;
+});
+</script>
+{% endblock %}

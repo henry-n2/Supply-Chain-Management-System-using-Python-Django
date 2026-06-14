@@ -1,0 +1,47 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Existing slider and product listing here -->
+
+    <h2 class="my-4">Your Transactions</h2>
+    {% if transactions %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Retailer</th>
+                    <th>Block Hash</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr>
+                    <td>{{ tx.transaction_id }}</td>
+                    <td>{{ tx.product.product.product.name }}</td>
+                    <td>₹{{ tx.amount|floatformat:2 }}</td>
+                    <td>{{ tx.quantity }}</td>
+                    <td>{{ tx.retailer.get_full_name }}</td>
+                    <td>
+                        {% if tx.block_set.all %}
+                            {{ tx.block_set.all.0.hash }}
+                        {% else %}
+                            Not in blockchain yet
+                        {% endif %}
+                    </td>
+                    <td>{{ tx.timestamp|date:"F d, Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No transactions found.</p>
+    {% endif %}
+</div>
+{% endblock %}

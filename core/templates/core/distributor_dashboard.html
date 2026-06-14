@@ -1,0 +1,146 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Distributor Dashboard</h2>
+
+    <h4 class="mt-4">Add Products from Manufacturers</h4>
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p class="text-muted">Base Price: ₹{{ product.base_price }}</p>
+                    <p class="text-muted">Available: {{ product.available_quantity }}</p>
+                    <form method="post" action="{% url 'add_to_distributor_stock' product.id %}">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="number" name="quantity" class="form-control" 
+                                   placeholder="Quantity" min="1" max="{{ product.available_quantity }}" required>
+                            <input type="number" name="price" class="form-control" 
+                                   placeholder="Retailer Price" step="0.01" min="0.01" required>
+                            <button class="btn btn-primary" type="submit">Add to Stock</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h4 class="mt-5">Your Added Products for Retailers</h4>
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price for Retailer</th>
+                <th>Available Quantity for Retailer</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in my_stocks %}
+            <tr>
+                <td>{{ stock.product.name }}</td>
+                <td>₹{{ stock.price }}</td>
+                <td>{{ stock.available_quantity }}</td>
+                <td>
+                    <a href="{% url 'edit_distributor_stock' stock.id %}" class="btn btn-sm btn-primary">Edit Price</a>
+                    <a href="{% url 'add_more_stock' stock.id %}" class="btn btn-sm btn-success">Add More</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No products added yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Sales to Retailers</h2>
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="text-sm uppercase">
+                        <th>Transaction ID</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Retailer</th>
+                        <th>Block Hash</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in sales_transactions %}
+                    <tr>
+                        <td>{{ tx.transaction_id }}</td>
+                        <td>{{ tx.product.product.product.name }}</td>
+                        <td>₹{{ tx.amount|floatformat:2 }}</td>
+                        <td>{{ tx.quantity }}</td>
+                        <td>{{ tx.customer.get_full_name }}</td>
+                        <td class="font-mono">
+                            {% if tx.blocks %}
+                                {{ tx.blocks.0.hash}}...
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </td>
+                        <td>{{ tx.timestamp|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No sales transactions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- New Purchases Table -->
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Purchases from Manufacturers</h2>
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="text-sm uppercase">
+                        <th>Transaction ID</th>
+                        <th>Product</th>
+                        <th>Manufacturer Price</th>
+                        <th>Quantity</th>
+                        <th>Manufacturer</th>
+                        <th>Block Hash</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in purchases_transactions %}
+                    <tr>
+                        <td>{{ tx.transaction_id }}</td>
+                        <td>{{ tx.manu_product.name }}</td>
+                        <td>₹{{ tx.manu_product.base_price|floatformat:2 }}</td>
+                        <td>{{ tx.quantity }}</td>
+                        <td>{{ tx.retailer.get_full_name }}</td>
+                        <td class="font-mono">
+                            {% if tx.blocks %}
+                                {{ tx.blocks.0.hash}}...
+                            {% else %}
+                                Pending
+                            {% endif %}
+                        </td>
+                        <td>{{ tx.timestamp|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No purchase transactions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

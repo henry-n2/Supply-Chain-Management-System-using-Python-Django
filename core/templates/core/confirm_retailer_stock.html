@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Confirm Stock Addition</h2>
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text">
+                Product: {{ distributor_stock.product.name }}<br>
+                Distributor Price: ₹{{ distributor_price }}<br>
+                Your Price: ₹{{ request.session.temp_stock_data.price }}<br>
+                Quantity: {{ request.session.temp_stock_data.quantity }}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Transaction ID</label>
+                    <input type="text" name="transaction_id" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Confirm & Add to Blockchain</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
