@@ -88,7 +88,7 @@ Follow these instructions to run the application locally on a development machin
 
 1. **Clone the Repository**
    ```bash
-   git clone <repository_url>
+   git clone https://github.com/henry-n2/Supply-Chain-Management-System-using-Python-Django.git
    cd supplychain
    ```
 
